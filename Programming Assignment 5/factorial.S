@@ -20,12 +20,15 @@ d:                            // d array
 
 main:
 	MOV X9, #3
-	MOV X10, #1
+	FMOV D9, #3.0
+	FMOV D10, #1.0
+	FMOV D11, #1.0
 loop:
 	CMP X9, #0
 	B.LE exit
-	MUL X10, X9, X10
+	FMUL D10, D9, D10
 	SUB X9, X9, #1
+	FSUB D9, D9, D11
 	B loop
 exit:
 	NOP
