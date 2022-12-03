@@ -19,29 +19,14 @@ d:                            // d array
 	 .type	main, %function   // main function
 
 main:
-	/* This assembly code performs simple cacluations using single and */
-/* double precision values by loading from the static array.       */
-
-	 .data                    // data section
-	 .type	s, %object        // defining object s
-	 .size	s, 3              // single-precision values
-	 .type	d, %object        // defining object d
-	 .size	d, 3              // double-precision values
-
-	 .text                    // program section
-	 .global	main          // main
-	 .arch armv8-a+fp+simd    // processor type
-	 .type	main, %function   // main function
-
-main:
-	FMOV D20, #2.5			// x
-	MOV X20, #7				// a
+	FMOV D20, #3.5			// x
+	MOV X20, #3				// a
 	MOV X9, XZR				// n = 0
 	FMOV D9, XZR
 	FMOV D21, XZR            // Set S3 = 0.0
 	MOV X22, SP				// stack pointer
 	FMOV D19, #1.0
-
+	ADD X20, X20, #1
 loop:
 	CMP X9, X20				// comparing n and a
 	B.GE exit
