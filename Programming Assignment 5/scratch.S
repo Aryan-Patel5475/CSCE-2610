@@ -32,7 +32,7 @@ loop:
 	B.GE exit
 
 	MOV X1, X9				// X1 = n
-	FMOV D2, D21			// D2 = x
+	FMOV D2, D20			// D2 = x
 	BL pow_func				// calling pow_func function
 	FMOV D10, D2			// D10 = D2
 
