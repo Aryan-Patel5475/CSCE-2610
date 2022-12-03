@@ -23,8 +23,8 @@ main:
 	MOV X12, #2
 	MOV X14, #2
 	CBZ X13, zero
-	SUB X16, X13, #1
-	CBZ X16, one
+	SUB X15, X13, #1
+	CBZ X15, one
 loop:
 	CMP X13, #1
 	B.LE exit
