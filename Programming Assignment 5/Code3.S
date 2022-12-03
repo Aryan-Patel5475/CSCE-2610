@@ -19,66 +19,103 @@ d:                            // d array
 	 .type	main, %function   // main function
 
 main:
-	MOV X27, #2				// x
-	MOV X20, #4				// a
-	MOV X9, XZR				// n
-	MOV X21, XZR			// y
+	/* This assembly code performs simple cacluations using single and */
+/* double precision values by loading from the static array.       */
+
+	 .data                    // data section
+	 .type	s, %object        // defining object s
+	 .size	s, 3              // single-precision values
+	 .type	d, %object        // defining object d
+	 .size	d, 3              // double-precision values
+
+	 .text                    // program section
+	 .global	main          // main
+	 .arch armv8-a+fp+simd    // processor type
+	 .type	main, %function   // main function
+
+main:
+	FMOV D20, #2.5			// x
+	MOV X20, #7				// a
+	MOV X9, XZR				// n = 0
+	FMOV D9, XZR
+	FMOV D21, XZR            // Set S3 = 0.0
 	MOV X22, SP				// stack pointer
+	FMOV D19, #1.0
+
 loop:
 	CMP X9, X20				// comparing n and a
-	B.GE exit				// exiting the loop if n is not less than a
-	MOV X1, X9				// X1 = n
-	MOV X2, X27				// X2 = x
-	BL pow_function			// calling pow_function
-	MOV X10, X2				// moving answer we got from pow_function to X10
-	MOV X1, X9				// X1 = n
-	BL factorial			// calling factoriall function
-	MOV X11, X0				// moving result from factorial functio X11
-	SDIV X12, X10, X11		// Diving two results and storing it in X12
-	ADD X21, X21, X12		// Adding divided value to X21
-	ADD X9, X9, #1			// incrementing
-	B loop
+	B.GE exit
 
-pow_function:
-	SUB X22, X22, #32		// allocating space on stack
-	STUR X12, [X22, #0]		// storing value of registers
+	MOV X1, X9				// X1 = n
+	FMOV D2, D20			// D2 = x
+	BL pow_func				// calling pow_func function
+	FMOV D10, D2			// D10 = D2
+
+	MOV X1, X9				// X1 = n
+	FMOV D1, D9
+	BL factorial			// calling factorial function
+	FMOV D11, D0			// D11 = D0
+
+	FDIV D12, D10, D11		// D12 = D10 / D11
+	FADD D21, D21, D12		// adding value divided value to D12
+	ADD X9, X9, #1			// incrementing by 1
+	FADD D9, D9, D19
+	B loop					// calling function again
+
+pow_func:
+	SUB X22, X22, #24		// allocating space on the stack
+	STUR X12, [X22, #0]		// storing register value onto stack
 	STUR X13, [X22, #8]
-	STUR X14, [X22, #16]
-	STUR X15, [X22, #24]
-	MOV X12, X2
-	MUL X13, X12, X1		// X13 = 2*n
-	CBZ X13, zero
-	SUB X15, X13, #1
-	CBZ X15, one
+	STUR D14, [X22, #16]
+
+	MOV X12, #2
+	FMOV D14, D2
+	MUL X12, X1, X12		// X12 = 2 * n
+
+	CBZ X12, zero
+
+	SUB X13, X12, #1
+	CBZ X13, one
+
 loop2:
-	CMP X13, #1
+	CMP X12, #1
 	B.LE fake_exit
-	MUL X2, X12, X2
-	SUB X13, X13, #1
+	FMUL D2, D2, D14
+	SUB X12, X12, #1
 	B loop2
+
 zero:
-	MOV X2, #1
+	FMOV D2, #1.0
 	B fake_exit
+
 one:
-	MOV X2, X2
+	FMOV D2, D2
 	B fake_exit
+
 fake_exit:
-	LDUR X12, [X22, #0]
+	LDUR X12, [X22, #0]		// restoring values back in register
 	LDUR X13, [X22, #8]
-	LDUR X14, [X22, #16]
-	LDUR X15, [X22, #24]
-	ADD X22, X22, #32
+	LDUR D14, [X22, #16]
+	ADD X22, X22, #24
 	BR X30
 
 factorial:
-	MOV X0, #1
+	SUB X22, X22, #16		// allocating space on the stack
+	STUR D10, [X22, #0]		// storing register value onto stack
+	STUR D11, [X22, #8]
+	FMOV D0, #1.0
+	FMOV D11, #1.0
 loop3:
 	CMP X1, #0
 	B.LE fake_exit2
-	MUL X0, X1, X0
+	FMUL D0, D1, D0
 	SUB X1, X1, #1
+	FSUB D1, D1, D11
 	B loop3
 fake_exit2:
+	LDUR D10, [X22, #0]
+	LDUR D11, [X22, #8]
+	ADD X22, X22, #16
 	BR X30
 
 exit:
